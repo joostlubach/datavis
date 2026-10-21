@@ -1,7 +1,7 @@
 import { useTheme } from '@mui/joy'
 import { memo } from 'react-util'
+import { useDatavisTranslation } from '../hooks/useDatavisTranslation'
 import { ChartView, ChartViewSeries } from '../components/ChartView'
-import { useDatavisMessages } from '../DatavisMessages'
 import { ChartSeriesAxis, ChartVisualization } from '../types/ChartVisualization'
 import { Dataset } from '../types/Dataset'
 import { chartColors } from '../util/colors'
@@ -19,7 +19,7 @@ export interface ChartVisualizationViewProps {
 export const ChartVisualizationView = memo('ChartVisualizationView', (props: ChartVisualizationViewProps) => {
 
   const {visualization, data} = props
-  const messages = useDatavisMessages()
+  const {t} = useDatavisTranslation()
   const colors = chartColors(useTheme())
 
   const column = (name: string) => data.columns.findIndex(it => it.name === name)
@@ -33,7 +33,7 @@ export const ChartVisualizationView = memo('ChartVisualizationView', (props: Cha
     axis:           it.axis,
     mark:           it.type,
     color:          colors[index % colors.length],
-    rightAxisLabel: messages.rightAxis,
+    rightAxisLabel: t('right_axis'),
     index:          column(it.y),
   }))
 
@@ -45,20 +45,31 @@ export const ChartVisualizationView = memo('ChartVisualizationView', (props: Cha
 
   const axisColumn = (axis: ChartSeriesAxis) => data.columns[series.find(it => it.axis === axis)?.index ?? -1]
 
-  if (missing.length > 0) {
-    return <Message kind='error'>{messages.unknownColumn(missing.join(', '))}</Message>
-  }
-  if (points.length === 0) {
-    return <Message kind='empty'>{messages.noRows}</Message>
+  function render() {
+    if (missing.length > 0) {
+      return (
+        <Message kind='error'>
+          {t('unknown_column', {column: missing.join(', ')})}
+        </Message>
+      )
+    } else if (points.length === 0) {
+      return (
+        <Message kind='empty'>
+          {t('no_rows')}
+        </Message>
+      )
+    } else {
+      return (
+        <ChartView
+          series={series}
+          points={points}
+          formatValue={(value, it) => formatValue(value, data.columns[(it as typeof series[number]).index])}
+          formatTick={(value, axis) => formatTick(value, axisColumn(axis))}
+        />
+      )
+    }
   }
 
-  return (
-    <ChartView
-      series={series}
-      points={points}
-      formatValue={(value, it) => formatValue(value, data.columns[(it as typeof series[number]).index])}
-      formatTick={(value, axis) => formatTick(value, axisColumn(axis))}
-    />
-  )
+  return render()
 
 })

@@ -1,7 +1,7 @@
 import { memo } from 'react-util'
 import { MetricValue } from '../components/MetricValue'
 import { Delta } from '../components/DeltaIcon'
-import { useDatavisMessages } from '../DatavisMessages'
+import { useDatavisTranslation } from '../hooks/useDatavisTranslation'
 import { Dataset } from '../types/Dataset'
 import { MetricVisualization } from '../types/MetricVisualization'
 import { formatValue, toNumber } from '../util/format'
@@ -19,7 +19,7 @@ export interface MetricVisualizationViewProps {
 export const MetricVisualizationView = memo('MetricVisualizationView', (props: MetricVisualizationViewProps) => {
 
   const {visualization, data} = props
-  const messages = useDatavisMessages()
+  const {t} = useDatavisTranslation()
 
   const index = visualization.column == null ? 0 : data.columns.findIndex(it => it.name === visualization.column)
   const column = data.columns[index]
@@ -27,10 +27,10 @@ export const MetricVisualizationView = memo('MetricVisualizationView', (props: M
   const row = data.rows[0]
 
   if (column == null) {
-    return <Message kind='error'>{messages.unknownColumn(visualization.column ?? '')}</Message>
+    return <Message kind='error'>{t('unknown_column', {column: visualization.column ?? ''})}</Message>
   }
   if (baselineIndex === -1) {
-    return <Message kind='error'>{messages.unknownColumn(visualization.baseline ?? '')}</Message>
+    return <Message kind='error'>{t('unknown_column', {column: visualization.baseline ?? ''})}</Message>
   }
 
   const delta = row == null || baselineIndex == null ? null : deltaOf(toNumber(row[index]), toNumber(row[baselineIndex]))
@@ -43,7 +43,7 @@ export const MetricVisualizationView = memo('MetricVisualizationView', (props: M
       unit={visualization.unit}
       color={good == null ? undefined : good ? 'success' : 'danger'}
       delta={delta ?? undefined}
-      detail={baseline == null ? null : messages.baseline(baseline)}
+      detail={baseline == null ? null : t('baseline', {value: baseline})}
     />
   )
 

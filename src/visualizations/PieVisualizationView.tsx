@@ -1,7 +1,7 @@
 import { Box, Stack, Typography, useTheme } from '@mui/joy'
 import { useState } from 'react'
 import { memo } from 'react-util'
-import { useDatavisMessages } from '../DatavisMessages'
+import { useDatavisTranslation } from '../hooks/useDatavisTranslation'
 import { Dataset } from '../types/Dataset'
 import { PieVisualization } from '../types/PieVisualization'
 import { chartColors } from '../util/colors'
@@ -20,7 +20,7 @@ export interface PieVisualizationViewProps {
 export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisualizationViewProps) => {
 
   const {visualization, data} = props
-  const messages = useDatavisMessages()
+  const {t} = useDatavisTranslation()
   const theme = useTheme()
   const colors = chartColors(theme)
   const [hovered, setHovered] = useState<number | null>(null)
@@ -39,7 +39,7 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
     const rest = all.slice(colors.length - 1)
     return [
       ...all.slice(0, colors.length - 1),
-      {label: messages.other, value: rest.reduce((total, it) => total + it.value, 0)},
+      {label: t('other'), value: rest.reduce((total, it) => total + it.value, 0)},
     ]
   })()
   const total = slices.reduce((sum, it) => sum + it.value, 0)
@@ -48,10 +48,10 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
 
   function render() {
     if (missing.length > 0) {
-      return <Message kind='error'>{messages.unknownColumn(missing.join(', '))}</Message>
+      return <Message kind='error'>{t('unknown_column', {column: missing.join(', ')})}</Message>
     }
     if (total === 0) {
-      return <Message kind='empty'>{messages.noRows}</Message>
+      return <Message kind='empty'>{t('no_rows')}</Message>
     }
 
     return (
