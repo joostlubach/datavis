@@ -1,4 +1,5 @@
 import { useTheme } from '@mui/joy'
+import { useCallback } from 'react'
 import { memo } from 'react-util'
 import { useDatavisTranslation } from '../hooks/useDatavisTranslation'
 import { ChartView, ChartViewSeries } from '../components/ChartView'
@@ -43,7 +44,15 @@ export const ChartVisualizationView = memo('ChartVisualizationView', (props: Cha
     values: series.map(it => toNumber(row[it.index])),
   }))
 
-  const axisColumn = (axis: ChartSeriesAxis) => data.columns[series.find(it => it.axis === axis)?.index ?? -1]
+  const formatSeriesValue = useCallback((value: number, it: ChartViewSeries) => {
+    return formatValue(value, data.columns.find(column => column.name === it.key))
+  }, [data.columns])
+
+  // A tick of an axis is formatted like the first series on it.
+  const formatAxisTick = useCallback((value: number, axis: ChartSeriesAxis) => {
+    const y = visualization.series.find(it => it.axis === axis)?.y
+    return formatTick(value, data.columns.find(column => column.name === y))
+  }, [data.columns, visualization.series])
 
   function render() {
     if (missing.length > 0) {
@@ -63,8 +72,8 @@ export const ChartVisualizationView = memo('ChartVisualizationView', (props: Cha
         <ChartView
           series={series}
           points={points}
-          formatValue={(value, it) => formatValue(value, data.columns[(it as typeof series[number]).index])}
-          formatTick={(value, axis) => formatTick(value, axisColumn(axis))}
+          formatValue={formatSeriesValue}
+          formatTick={formatAxisTick}
         />
       )
     }

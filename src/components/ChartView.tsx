@@ -1,5 +1,5 @@
 import { Box, Divider, Stack, Typography, useTheme } from '@mui/joy'
-import { ReactNode, useId, useRef, useState } from 'react'
+import { ReactNode, useCallback, useId, useRef, useState } from 'react'
 import { useSize } from 'react-measure'
 import { memo } from 'react-util'
 import { ChartSeriesAxis, ChartSeriesType } from '../types/ChartVisualization'
@@ -32,6 +32,7 @@ export const ChartView = memo('ChartView', (props: ChartViewProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const {width} = useSize(containerRef)
   const [hovered, setHovered] = useState<number | null>(null)
+  const clearHovered = useCallback(() => setHovered(null), [])
 
   const hasRight = series.some(it => it.axis === ChartSeriesAxis.Secondary)
 
@@ -62,7 +63,7 @@ export const ChartView = memo('ChartView', (props: ChartViewProps) => {
     return (
       <Stack gap={1}>
         {(series.length > 1 || legendExtra != null) && renderLegend()}
-        <Box ref={containerRef} sx={$.plot} onMouseLeave={() => setHovered(null)}>
+        <Box ref={containerRef} sx={$.plot} onMouseLeave={clearHovered}>
           {width > 0 && (
             <svg width={width} height={HEIGHT} style={{display: 'block'}}>
               {renderHatchPattern()}
@@ -249,14 +250,13 @@ export const ChartView = memo('ChartView', (props: ChartViewProps) => {
 
   function renderHitTargets() {
     return points.map((_, index) => (
-      <rect
+      <HitTarget
         key={index}
+        index={index}
         x={margin.left + band * index}
-        y={margin.top}
         width={band}
         height={innerHeight}
-        fill='transparent'
-        onMouseEnter={() => setHovered(index)}
+        onHover={setHovered}
       />
     ))
   }
@@ -324,6 +324,26 @@ export interface ChartPoint {
   /** Per series, the part of the value that is hatched. */
   hatched?: Array<number | null>
 }
+
+interface HitTargetProps {
+  index:   number
+  x:       number
+  width:   number
+  height:  number
+  onHover: (index: number) => void
+}
+
+const HitTarget = memo('HitTarget', (props: HitTargetProps) => {
+
+  const {index, x, width, height, onHover} = props
+
+  const hover = useCallback(() => {
+    onHover(index)
+  }, [index, onHover])
+
+  return <rect x={x} y={margin.top} width={width} height={height} fill='transparent' onMouseEnter={hover}/>
+
+})
 
 const HEIGHT = 200
 const MAX_BAR = 24

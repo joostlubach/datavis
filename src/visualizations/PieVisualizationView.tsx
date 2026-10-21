@@ -1,5 +1,5 @@
 import { Box, Stack, Typography, useTheme } from '@mui/joy'
-import { useState } from 'react'
+import { CSSProperties, ReactNode, useCallback, useState } from 'react'
 import { memo } from 'react-util'
 import { useDatavisTranslation } from '../hooks/useDatavisTranslation'
 import { Dataset } from '../types/Dataset'
@@ -24,6 +24,7 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
   const theme = useTheme()
   const colors = chartColors(theme)
   const [hovered, setHovered] = useState<number | null>(null)
+  const clearHovered = useCallback(() => setHovered(null), [])
 
   const labelIndex = data.columns.findIndex(it => it.name === visualization.label)
   const valueIndex = data.columns.findIndex(it => it.name === visualization.value)
@@ -55,7 +56,7 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
     }
 
     return (
-      <Stack direction='row' sx={$.PieVisualizationView} onMouseLeave={() => setHovered(null)}>
+      <Stack direction='row' sx={$.PieVisualizationView} onMouseLeave={clearHovered}>
         {renderPie()}
         {renderLegend()}
       </Stack>
@@ -73,17 +74,17 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
           angle += slice.value / total * Math.PI * 2
 
           return (
-            <path
+            <PieSlice
               key={index}
+              index={index}
               d={slicePath(start, angle, index === hovered ? RADIUS + 4 : RADIUS, inner)}
-              fillRule='evenodd'
               style={{
                 fill:        colors[index],
                 stroke:      theme.vars.palette.background.surface,
                 strokeWidth: slices.length > 1 ? 2 : 0,
                 opacity:     hovered == null || hovered === index ? 1 : 0.5,
               }}
-              onMouseEnter={() => setHovered(index)}
+              onHover={setHovered}
             />
           )
         })}
@@ -111,14 +112,7 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
     return (
       <Stack gap={0.5} sx={$.legend}>
         {slices.map((slice, index) => (
-          <Stack
-            key={index}
-            direction='row'
-            gap={1}
-            alignItems='center'
-            sx={[$.legendRow, hovered === index && $.hovered]}
-            onMouseEnter={() => setHovered(index)}
-          >
+          <PieLegendRow key={index} index={index} hovered={hovered === index} onHover={setHovered}>
             <Box sx={[$.swatch, {bgcolor: colors[index]}]}/>
             <Typography level='body-xs' textColor='text.secondary' noWrap sx={$.label}>{slice.label}</Typography>
             <Typography level='body-xs' noWrap sx={$.value}>
@@ -127,7 +121,7 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
             <Typography level='body-xs' textColor='text.tertiary' noWrap sx={$.percentage}>
               {formatPercentage(slice.value / total)}
             </Typography>
-          </Stack>
+          </PieLegendRow>
         ))}
       </Stack>
     )
@@ -136,6 +130,48 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
   // #endregion
 
   return render()
+
+})
+
+interface PieSliceProps {
+  index:   number
+  d:       string
+  style:   CSSProperties
+  onHover: (index: number) => void
+}
+
+const PieSlice = memo('PieSlice', (props: PieSliceProps) => {
+
+  const {index, d, style, onHover} = props
+
+  const hover = useCallback(() => {
+    onHover(index)
+  }, [index, onHover])
+
+  return <path d={d} fillRule='evenodd' style={style} onMouseEnter={hover}/>
+
+})
+
+interface PieLegendRowProps {
+  index:    number
+  hovered:  boolean
+  onHover:  (index: number) => void
+  children: ReactNode
+}
+
+const PieLegendRow = memo('PieLegendRow', (props: PieLegendRowProps) => {
+
+  const {index, hovered, onHover, children} = props
+
+  const hover = useCallback(() => {
+    onHover(index)
+  }, [index, onHover])
+
+  return (
+    <Stack direction='row' gap={1} alignItems='center' sx={[$.legendRow, hovered && $.hovered]} onMouseEnter={hover}>
+      {children}
+    </Stack>
+  )
 
 })
 
