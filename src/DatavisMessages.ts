@@ -8,6 +8,7 @@ export const DatavisMessagesContext = createContext<DatavisMessages>({
   unknownColumn: column => `Column ${column} does not appear in the result.`,
   rightAxis:     "right axis",
   other:         "Other",
+  baseline:      value => `was ${value}`,
 })
 
 export function useDatavisMessages() {
@@ -21,4 +22,6 @@ export interface DatavisMessages {
   rightAxis:     string
   /** The slice of a pie chart with the rest of the rows. */
   other:         string
+  /** The value a metric is compared with. */
+  baseline:      (value: string) => string
 }

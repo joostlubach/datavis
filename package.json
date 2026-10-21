@@ -25,7 +25,8 @@
   "peerDependencies": {
     "@mui/joy": "^5.0.0-beta.52",
     "luxon": "^3.4.4",
-    "react": "^19.1"
+    "react": "^19.1",
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^5.10.0",
@@ -41,6 +42,7 @@
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3",
     "vitest": "^4.0.18",
-    "yaml": "^2.8.2"
+    "yaml": "^2.8.2",
+    "zod": "^4.6.5"
   }
 }
