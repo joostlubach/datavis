@@ -24,15 +24,10 @@
   },
   "peerDependencies": {
     "@mui/joy": "^5.0.0-beta.52",
-    "i18next": "^25",
-    "luxon": "^3.4.4",
-    "react": "^19.1",
-    "react-i18next": "^15",
-    "zod": "^4.0.0"
+    "react": "^19.1"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@types/luxon": "^3.4.2",
     "@types/react": "^19.1",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.65.0",
@@ -41,12 +36,9 @@
     "eslint-plugin-react-refresh": "^0.4.26",
     "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^16.4.0",
-    "i18next": "^25.10.10",
-    "react-i18next": "^15.7.4",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3",
     "vitest": "^4.0.18",
-    "yaml": "^2.8.2",
-    "zod": "^4.6.5"
+    "yaml": "^2.8.2"
   }
 }

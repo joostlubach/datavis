@@ -1,46 +1,38 @@
 import { Box, Stack, Typography, useTheme } from '@mui/joy'
 import { CSSProperties, ReactNode, useCallback, useState } from 'react'
 import { memo } from 'react-util'
-import { useDatavisTranslation } from '../hooks/useDatavisTranslation'
-import { Dataset } from '../types/Dataset'
-import { PieVisualization } from '../types/PieVisualization'
 import { chartColors } from '../util/colors'
-import { formatPercentage, formatValue, toNumber } from '../util/format'
 import { sx$ } from '../util/sx'
-import { Message } from './Message'
 
-export interface PieVisualizationViewProps {
-  visualization: PieVisualization
-  data:          Dataset
+export interface PieChartProps {
+  slices:      PieChartSlice[]
+  /** With a hole that shows the total. */
+  donut?:      boolean
+  formatValue: (value: number) => string
+  /** The slice with the rest, if there are more slices than colors. */
+  otherLabel:  string
 }
 
 /**
- * A pie chart with a slice per row, with a legend that holds the values.
+ * A pie chart, with a legend that holds the values.
  */
-export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisualizationViewProps) => {
+export const PieChart = memo('PieChart', (props: PieChartProps) => {
 
-  const {visualization, data} = props
-  const {t} = useDatavisTranslation()
+  const {donut = false, formatValue, otherLabel} = props
   const theme = useTheme()
   const colors = chartColors(theme)
   const [hovered, setHovered] = useState<number | null>(null)
   const clearHovered = useCallback(() => setHovered(null), [])
 
-  const labelIndex = data.columns.findIndex(it => it.name === visualization.label)
-  const valueIndex = data.columns.findIndex(it => it.name === visualization.value)
-  const missing = [visualization.label, visualization.value].filter(name => !data.columns.some(it => it.name === name))
-
   const slices = (() => {
-    const all = data.rows
-      .map(row => ({label: formatValue(row[labelIndex], data.columns[labelIndex]), value: toNumber(row[valueIndex]) ?? 0}))
-      .filter(it => it.value > 0)
+    const all = props.slices.filter(it => it.value > 0)
 
     // A slice per color at most; the rest goes together.
     if (all.length <= colors.length) { return all }
     const rest = all.slice(colors.length - 1)
     return [
       ...all.slice(0, colors.length - 1),
-      {label: t('other'), value: rest.reduce((total, it) => total + it.value, 0)},
+      {label: otherLabel, value: rest.reduce((total, it) => total + it.value, 0)},
     ]
   })()
   const total = slices.reduce((sum, it) => sum + it.value, 0)
@@ -48,15 +40,8 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
   // #region Rendering
 
   function render() {
-    if (missing.length > 0) {
-      return <Message kind='error'>{t('unknown_column', {column: missing.join(', ')})}</Message>
-    }
-    if (total === 0) {
-      return <Message kind='empty'>{t('no_rows')}</Message>
-    }
-
     return (
-      <Stack direction='row' sx={$.PieVisualizationView} onMouseLeave={clearHovered}>
+      <Stack direction='row' sx={$.PieChart} onMouseLeave={clearHovered}>
         {renderPie()}
         {renderLegend()}
       </Stack>
@@ -64,7 +49,7 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
   }
 
   function renderPie() {
-    const inner = visualization.donut ? RADIUS * DONUT_HOLE : 0
+    const inner = donut ? RADIUS * DONUT_HOLE : 0
     let angle = -Math.PI / 2
 
     return (
@@ -74,7 +59,7 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
           angle += slice.value / total * Math.PI * 2
 
           return (
-            <PieSlice
+            <PieSlicePath
               key={index}
               index={index}
               d={slicePath(start, angle, index === hovered ? RADIUS + 4 : RADIUS, inner)}
@@ -88,7 +73,7 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
             />
           )
         })}
-        {visualization.donut && renderTotal()}
+        {donut && renderTotal()}
       </svg>
     )
   }
@@ -103,7 +88,7 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
         dominantBaseline='central'
         style={{fill: theme.vars.palette.text.primary, fontSize: 20, fontWeight: 600}}
       >
-        {formatValue(slice?.value ?? total, data.columns[valueIndex])}
+        {formatValue(slice?.value ?? total)}
       </text>
     )
   }
@@ -116,7 +101,7 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
             <Box sx={[$.swatch, {bgcolor: colors[index]}]}/>
             <Typography level='body-xs' textColor='text.secondary' noWrap sx={$.label}>{slice.label}</Typography>
             <Typography level='body-xs' noWrap sx={$.value}>
-              {formatValue(slice.value, data.columns[valueIndex])}
+              {formatValue(slice.value)}
             </Typography>
             <Typography level='body-xs' textColor='text.tertiary' noWrap sx={$.percentage}>
               {formatPercentage(slice.value / total)}
@@ -133,14 +118,19 @@ export const PieVisualizationView = memo('PieVisualizationView', (props: PieVisu
 
 })
 
-interface PieSliceProps {
+export interface PieChartSlice {
+  label: string
+  value: number
+}
+
+interface PieSlicePathProps {
   index:   number
   d:       string
   style:   CSSProperties
   onHover: (index: number) => void
 }
 
-const PieSlice = memo('PieSlice', (props: PieSliceProps) => {
+const PieSlicePath = memo('PieSlicePath', (props: PieSlicePathProps) => {
 
   const {index, d, style, onHover} = props
 
@@ -175,6 +165,10 @@ const PieLegendRow = memo('PieLegendRow', (props: PieLegendRowProps) => {
 
 })
 
+function formatPercentage(value: number) {
+  return value.toLocaleString('nl-NL', {style: 'percent', maximumFractionDigits: 0})
+}
+
 const SIZE = 168
 const RADIUS = SIZE / 2 - 6
 const DONUT_HOLE = 0.6
@@ -202,7 +196,7 @@ function slicePath(start: number, end: number, radius: number, inner: number) {
 }
 
 const $ = sx$({
-  PieVisualizationView: {
+  PieChart: {
     gap:        3,
     alignItems: 'center',
     flexWrap:   'wrap',
