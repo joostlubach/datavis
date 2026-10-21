@@ -43,7 +43,7 @@ export const MetricVisualizationView = memo('MetricVisualizationView', (props: M
       unit={visualization.unit}
       color={good == null ? undefined : good ? 'success' : 'danger'}
       delta={delta ?? undefined}
-      detail={baseline == null ? null : t('baseline', {value: baseline})}
+      detail={baseline}
     />
   )
 
