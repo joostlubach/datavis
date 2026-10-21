@@ -18,13 +18,18 @@
     "check": "tsc -p . --noEmit",
     "test": "vitest"
   },
-  "dependencies": {},
+  "dependencies": {
+    "react-measure": "workspace:*",
+    "react-util": "workspace:*"
+  },
   "peerDependencies": {
     "@mui/joy": "^5.0.0-beta.52",
+    "luxon": "^3.4.4",
     "react": "^19.1"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/luxon": "^3.4.2",
     "@types/react": "^19.1",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.65.0",
