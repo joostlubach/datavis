@@ -1,0 +1,41 @@
+{
+  "name": "datavis",
+  "version": "0.0.1",
+  "description": "Generic data visualization components",
+  "private": true,
+  "author": "Joost Lubach <joostlubach@gmail.com>",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "npm run clean && npm run build:tsc",
+    "build:tsc": "npm run build:tsc:esm && npm run build:tsc:cjs",
+    "build:tsc:esm": "tsc -p tsconfig.prod.json --module es2022 --outDir dist/esm --declarationDir dist/types",
+    "build:tsc:cjs": "tsc -p tsconfig.prod.json --module commonjs --outDir dist/cjs --declaration false --declarationMap false",
+    "clean": "rimraf dist",
+    "lint": "eslint",
+    "check": "tsc -p . --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "@mui/joy": "^5.0.0-beta.52",
+    "react": "^19.1"
+  },
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/react": "^19.1",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.26",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "globals": "^16.4.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3",
+    "vitest": "^4.0.18",
+    "yaml": "^2.8.2"
+  }
+}
