@@ -1,6 +1,6 @@
 import { Box, Stack, Typography, useTheme } from '@mui/joy'
 import { CSSProperties, ReactNode, useCallback, useState } from 'react'
-import { memo } from 'react-util'
+import { memo } from '@mosdev/react-util'
 import { chartColors } from '../util/colors'
 import { sx$ } from '../util/sx'
 

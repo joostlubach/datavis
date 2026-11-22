@@ -1,5 +1,5 @@
 import { Box } from '@mui/joy'
-import { memo } from 'react-util'
+import { memo } from '@mosdev/react-util'
 import { hatchColor } from '../util/colors'
 import { sx$ } from '../util/sx'
 

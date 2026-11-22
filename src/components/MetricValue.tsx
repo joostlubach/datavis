@@ -1,5 +1,5 @@
 import { ColorPaletteProp, Stack, Typography } from '@mui/joy'
-import { memo } from 'react-util'
+import { memo } from '@mosdev/react-util'
 import { Delta, DeltaIcon } from './DeltaIcon'
 import { sx$ } from '../util/sx'
 

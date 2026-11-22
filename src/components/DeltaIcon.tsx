@@ -1,4 +1,4 @@
-import { memo } from 'react-util'
+import { memo } from '@mosdev/react-util'
 
 export interface DeltaIconProps {
   delta: Delta
